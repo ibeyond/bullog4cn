@@ -25,8 +25,7 @@ pageTracker._trackPageview();
 class MainPage(webapp.RequestHandler):
     
     def get(self):
-        #记录一下Agent,准备干掉一批搜索引擎，节省流量。
-        logging.debug('User-Agent = %s ' % self.request.headers['User-Agent'])
+
         uri = self.request.uri
         url_list = uri.split('/')
         if uri == self.request.scheme + '://' + self.request.host + '/favicon.ico':
@@ -60,8 +59,10 @@ class MainPage(webapp.RequestHandler):
                         self.redirect(uri.replace('https://','http://'))
                     self.response.out.write(result.content)
                 else:
+                    #记录一下Agent,准备干掉一批搜索引擎，节省流量。
+                    logging.debug('User-Agent = %s ' % self.request.headers['User-Agent'])
                     self.response.out.write(self.replace(result.content,
-                                                {remote_host:'https://' + self.request.host + '/',}
+                                                {remote_host:self.request.scheme + self.request.host + '/',}
                                                 ) + google_analytics)
             else:
                 self.response.set_status(result.status_code)
@@ -74,36 +75,15 @@ class MainPage(webapp.RequestHandler):
     def replace(self,content,replace_str_dict={}):
             for k,v in replace_str_dict.items():
                 content = content.replace(k,v)
+            import re
+            regx = r'(?P<tag>src=(\"|\'))(?P<url>/.*\.(gif|png|bmp|ico|jpg)(\"|\'))'
+            content = re.sub(regx,r'\g<tag>http://' + self.request.host + '\g<url>',unicode(content,'utf-8'))
             return content
     #残次品，暂时没有具体功能。
     def post(self):
-        uri = self.request.uri
-        url_list = uri.split('/')
-        
-        url = (remote_host + '/'.join(url_list[3:]))
-        try:
-            import urllib
-            form_fields = {}
-            for k,v in self.request.POST.items():
-                form_fields[k.encode('utf-8')] = v.encode('utf-8')
-            form_data = urllib.urlencode(form_fields)
-            result = urlfetch.fetch(url=url,
-                                    payload=form_data,
-                                    method=urlfetch.POST,
-                                    headers=self.request.headers)
-            if result.status_code == 200:
-                self.response.headers['Content-Type'] = result.headers['Content-Type']
-                self.response.out.write(self.replace(result.content,
-                                            {remote_host:'https://' + self.request.host + '/',}
-                                            ))
-            else:
-                self.response.out.write(u'暂不支持提交功能，具体什么时候能行，问GFW客服.<a href="/">返回首页</a>')
-                logging.error('status_code = %s' % result.status_code )
-                logging.error(url)
-        except Exception,e:
-            logging.exception(e)
-            pass    
-        
+        self.response.out.write(u'暂不支持提交功能，具体什么时候能行，问GFW客服.<a href="/">返回首页</a>')
+        return
+    
 def main():
     application = webapp.WSGIApplication(
                                        [('/.*', MainPage),],
