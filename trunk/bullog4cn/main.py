@@ -5,9 +5,11 @@ from google.appengine.ext import webapp
 from google.appengine.api import urlfetch
 from google.appengine.api import memcache
 
+#远程主机，如果想代理其他主机的话。。。。。
 remote_host = 'http://www.bullogger.com/'
 remote_favicon = remote_host + 'App_Themes/p_portal/images/shortcut.ico'
 
+#google分析代码，自己看着办。
 google_analytics = """
 <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
@@ -23,6 +25,8 @@ pageTracker._trackPageview();
 class MainPage(webapp.RequestHandler):
     
     def get(self):
+        #记录一下Agent,准备干掉一批搜索引擎，节省流量。
+        logging.debug('User-Agent = %s ' % self.request.headers['User-Agent'])
         uri = self.request.uri
         url_list = uri.split('/')
         if uri == self.request.scheme + '://' + self.request.host + '/favicon.ico':
@@ -33,6 +37,7 @@ class MainPage(webapp.RequestHandler):
             #memcache.flush_all()
             result = memcache.get(url)
             if result is not None:
+                #如果是图片，重定向到http方式，节省点ssl的流量。
                 if result.headers['Content-Type'].find('image') != -1 and uri.find('https://') != -1:
                     self.redirect(uri.replace('https://','http://'))
                 self.response.headers['Content-Type'] = result.headers['Content-Type']
@@ -46,9 +51,11 @@ class MainPage(webapp.RequestHandler):
                 self.response.headers['Content-Type'] = result.headers['Content-Type']
                 if result.headers['Content-Type'].find('text/html') == -1:
                     try:
+                        #非html内容，先Cache一天再说，当然，主要是图片
                         memcache.add(url,result,86400)
                     except:
                         pass
+                    #如果是图片，重定向到http方式，节省点ssl的流量。
                     if result.headers['Content-Type'].find('image') != -1 and uri.find('https://') != -1:
                         self.redirect(uri.replace('https://','http://'))
                     self.response.out.write(result.content)
@@ -63,12 +70,12 @@ class MainPage(webapp.RequestHandler):
         except Exception,e:
             logging.exception(e)
             pass                    
-
+        
     def replace(self,content,replace_str_dict={}):
             for k,v in replace_str_dict.items():
                 content = content.replace(k,v)
             return content
-        
+    #残次品，暂时没有具体功能。
     def post(self):
         uri = self.request.uri
         url_list = uri.split('/')
