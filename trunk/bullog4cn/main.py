@@ -66,6 +66,7 @@ class MainPage(webapp.RequestHandler):
                                                 ) + google_analytics)
             else:
                 self.response.set_status(result.status_code)
+                self.response.out.write(u'牛博国际拒绝了我的访问，请稍候再试<br/>status_code = %s' % result.status_code )
                 logging.error('status_code = %s' % result.status_code )
                 logging.error(url)
         except Exception,e:
