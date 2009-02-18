@@ -62,7 +62,7 @@ class MainPage(webapp.RequestHandler):
                     #记录一下Agent,准备干掉一批搜索引擎，节省流量。
                     logging.debug('User-Agent = %s ' % self.request.headers['User-Agent'])
                     self.response.out.write(self.replace(result.content,
-                                                {remote_host:self.request.scheme + self.request.host + '/',}
+                                                {remote_host:self.request.scheme + "://"+ self.request.host + '/',}
                                                 ) + google_analytics)
             else:
                 self.response.set_status(result.status_code)
@@ -76,11 +76,6 @@ class MainPage(webapp.RequestHandler):
     def replace(self,content,replace_str_dict={}):
             for k,v in replace_str_dict.items():
                 content = content.replace(k,v)
-            """
-            import re
-            regx = r'(?P<tag>src=(\"|\'))(?P<url>/.*\.(gif|png|bmp|ico|jpg)(\"|\'))'
-            content = re.sub(regx,r'\g<tag>http://' + self.request.host + '\g<url>',unicode(content,'utf-8'))
-            """
             return content
     #残次品，暂时没有具体功能。
     def post(self):
