@@ -76,9 +76,11 @@ class MainPage(webapp.RequestHandler):
     def replace(self,content,replace_str_dict={}):
             for k,v in replace_str_dict.items():
                 content = content.replace(k,v)
+            """
             import re
             regx = r'(?P<tag>src=(\"|\'))(?P<url>/.*\.(gif|png|bmp|ico|jpg)(\"|\'))'
             content = re.sub(regx,r'\g<tag>http://' + self.request.host + '\g<url>',unicode(content,'utf-8'))
+            """
             return content
     #残次品，暂时没有具体功能。
     def post(self):
