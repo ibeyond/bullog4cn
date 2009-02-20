@@ -7,6 +7,7 @@ from google.appengine.api import memcache
 
 #远程主机，如果想代理其他主机的话。。。。。
 remote_host = 'http://www.bullogger.com/'
+#此处只是为了搞一下牛博的favicon，因为不是默认位置，而很多浏览器都会去默认位置去找，看appspot的后台有404让我觉得很不爽。
 remote_favicon = remote_host + 'App_Themes/p_portal/images/shortcut.ico'
 
 #google分析代码，自己看着办。
@@ -76,6 +77,9 @@ class MainPage(webapp.RequestHandler):
     def replace(self,content,replace_str_dict={}):
             for k,v in replace_str_dict.items():
                 content = content.replace(k,v)
+            import re
+            regx = r'(?P<tag>src=(\"|\'))(?P<url>/.*(\"|\'))'
+            content = re.sub(regx,r'\g<tag>http://' + self.request.host + '\g<url>',unicode(content,'utf-8'))
             return content
     #残次品，暂时没有具体功能。
     def post(self):
