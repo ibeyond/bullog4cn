@@ -38,7 +38,7 @@ class MainPage(webapp.RequestHandler):
             result = memcache.get(url)
             if result is not None:
                 #如果是图片，重定向到http方式，节省点ssl的流量。
-                if result.headers['Content-Type'].find('image') != -1 and uri.find('https://') != -1:
+                if result.headers['Content-Type'].find('image') != -1 and uri.startswith('https://'):
                     self.redirect(uri.replace('https://','http://'))
                 self.response.headers['Content-Type'] = result.headers['Content-Type']
                 self.response.out.write(result.content)
@@ -56,7 +56,7 @@ class MainPage(webapp.RequestHandler):
                     except:
                         pass
                     #如果是图片，重定向到http方式，节省点ssl的流量。
-                    if result.headers['Content-Type'].find('image') != -1 and uri.find('https://') != -1:
+                    if result.headers['Content-Type'].find('image') != -1 and uri.startswith('https://'):
                         self.redirect(uri.replace('https://','http://'))
                     self.response.out.write(result.content)
                 else:
