@@ -33,6 +33,9 @@ class MainPage(webapp.RequestHandler):
             url = remote_favicon
         else:
             url = (remote_host + '/'.join(url_list[3:]))
+        if self.request.headers['User-Agent'] == 'Mediapartners-Google,gzip(gfe)' and uri.startswith('https://'):
+            self.redirect(uri.replace('https://','http://'),permanent=True)
+            return
         try:
             #memcache.flush_all()
             result = memcache.get(url)
